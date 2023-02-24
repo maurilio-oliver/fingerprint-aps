@@ -1,4 +1,11 @@
-# fingerprint - aps
+# Fingerprint - aps
+ 
+    Fingerprint é um aplicativo desktop desenvolvido como proposta para a aps do sexto semestre do curso de ciencia da computação.
+    
+     Nossa proposta é baseada em criar um sistema que funcine de modo indempendente em relaçao ao gerenciamento de acessos a dados 
+    restritos dentro de uma empresa, sendo capaz de comparar variantes da digital do usario de modo 1:1 ou 1:N...[reformar texto e comcluir]
+    
+    
 
 ## tecnologias
 
