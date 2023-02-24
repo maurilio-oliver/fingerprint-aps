@@ -1,0 +1,8 @@
+# compiler
+target
+.build
+.out
+#ides
+.code
+.vscpde
+.idea

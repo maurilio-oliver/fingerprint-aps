@@ -1,0 +1,16 @@
+version: '3.1'
+services:
+  db:
+    build:
+      context: .
+      dockerfile: DockerFiler
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: developer
+    ports:
+      - 0.0.0.0:8080:5432
+
+
+
+
