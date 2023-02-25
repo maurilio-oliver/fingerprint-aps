@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
+
 public class PropertiesTest {
     private static final Logger LOGGER = Logger.getLogger(Properties.class.getName());
 
@@ -20,11 +21,20 @@ public class PropertiesTest {
         Properties properties = PropertieHelper.load();
         // Check if properties is not null
         Assert.assertNotNull(properties);
+        // Check if this properties variable is instence of Propertie class
+        Assert.assertTrue((properties instanceof Properties));
+    }
 
-        if ((properties instanceof Properties)) {
-            LOGGER.log(Level.SEVERE,"test.properties.help.error.divergencia-na-instancia-do-objeto");
+    @Test
+    public void valuesPropertiesTest() {
+        Properties properties = PropertieHelper.load();
 
-        }
+        // check if properties value is not equals
+        Assert.assertNotEquals(20, properties.getProperty("test.value.not-equals"));
+        // check if properties value is equals
+        Assert.assertEquals(true, Boolean.valueOf(properties.getProperty("test.value.equals")));
+        // check if properties value does not exist
+        Assert.assertNull(properties.getProperty("test.value.not-exist"));
     }
 
 }

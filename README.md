@@ -8,7 +8,6 @@
     
 
 ## tecnologias
-
 - java 13 +
 - maven 
 - docker engine/ docker ou doker.io 
