@@ -1,5 +1,6 @@
 package db;
 
+import org.example.model.Person;
 import org.example.repository.db.DBMenager;
 import org.junit.Test;
 
@@ -9,12 +10,8 @@ public class DBMenagerTest {
     public void executeQueryTest() {
         DBMenager dbMenager = null;
 
-        try {
-            dbMenager = new DBMenager<model.Test>(new model.Test());
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        model.Test a = (model.Test) dbMenager.select("select * from test");
+        dbMenager = new DBMenager<Person>(new Person());
+        Person a = (Person) dbMenager.select("select * from person");
 
 
     }
@@ -27,13 +24,9 @@ public class DBMenagerTest {
         s.setId(0);
         s.setName("insert data test");
 
-        try {
-            dbMenager = new DBMenager<model.Test>(new model.Test());
-            dbMenager.update(s);
-            var b = dbMenager.select("select * from test");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        dbMenager = new DBMenager<model.Test>(new model.Test());
+        dbMenager.update(s);
+        var b = dbMenager.select("select * from test");
     }
 
     @Test
@@ -44,15 +37,10 @@ public class DBMenagerTest {
         s.setId(1);
         s.setName("insert data test");
 
-        try {
-            dbMenager = new DBMenager<model.Test>(new model.Test());
-            dbMenager.insert(s);
-            model.Test b =(model.Test) dbMenager.select("select * from test where id = 1");
-            b.getTest();
-
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        dbMenager = new DBMenager<model.Test>(new model.Test());
+        dbMenager.insert(s);
+        model.Test b =(model.Test) dbMenager.select("select * from test where id = 1");
+        b.getTest();
 
     }
 
@@ -64,16 +52,12 @@ public class DBMenagerTest {
         s.setId(1);
         s.setName("insert data test");
 
-        try {
-            dbMenager = new DBMenager<model.Test>(new model.Test());
-            dbMenager.delete(s);
-            model.Test b =(model.Test) dbMenager.select("select * from test where id = 1");
-
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        dbMenager = new DBMenager<model.Test>(new model.Test());
+        dbMenager.delete(s);
+        model.Test b =(model.Test) dbMenager.select("select * from test where id = 1");
 
     }
+
 
 
 }

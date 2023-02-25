@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_PASSWORD: developer
     ports:
-      - 0.0.0.0:8080:5432
+      - "0.0.0.0:8080:5432"
 
 
 

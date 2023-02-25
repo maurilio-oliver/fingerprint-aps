@@ -1,5 +1,6 @@
 package org.example.repository.db;
 
+import com.google.gson.Gson;
 import org.example.helper.PropertieHelper;
 import org.example.model.Person;
 import org.example.model.Table;
@@ -14,7 +15,7 @@ public class DBMenager<T> {
     private Connection connection;
 
 
-    public DBMenager(T entity) throws ClassNotFoundException {
+    public DBMenager(T entity) {
         this.entity = entity;
     }
 
@@ -61,6 +62,7 @@ public class DBMenager<T> {
 
                         Method outSide = this.entity.getClass().getMethod(methodName.replace("set", "get"), null);
                         Object arg = resultSet.getObject(nameFormmater);
+                        arg = new Gson().fromJson(arg == null ? null : arg.toString(), outSide.getReturnType());
                         this.entity.getClass().getMethod(methodName, outSide.getReturnType()).invoke(entity, arg);
 
                     } catch (IllegalAccessException e) {
@@ -80,7 +82,7 @@ public class DBMenager<T> {
 
 
 
-    public void update(Object obj) {
+    public int update(Object obj) {
 
         String dbName = obj.getClass().getName().replace("model.", "").toLowerCase();
         String set = "";
@@ -114,14 +116,15 @@ public class DBMenager<T> {
                     .replace("?1",set.substring(2))
                     .replace("?2", id));
 
-            statement.executeUpdate();
+            return statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
     }
 
-    public void insert (T obj) {
+    public int insert (T obj) {
+
         String dbName = obj.getClass().getName().replace("model.", "").toLowerCase();
         String collum = "";
         String value = "";
@@ -132,8 +135,11 @@ public class DBMenager<T> {
 
             try {
             if (methodName.contains("get")) {
-                collum = collum + ", " + nameFormmater;
-                value = value + ", '" + declaredMethod.invoke(obj, null) +"'";
+                Object a = declaredMethod.invoke(obj, null);
+                if (a != null) {
+                    collum = collum + ", " + nameFormmater;
+                    value = value + ", '" + a + "'";
+                }
             }
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
@@ -152,7 +158,7 @@ public class DBMenager<T> {
                     .replace("?1", collum.substring(2))
                     .replace("?2", value.substring(2)));
 
-            statement.executeUpdate();
+          return  statement.executeUpdate();
 
 
         } catch (SQLException e) {
@@ -163,7 +169,13 @@ public class DBMenager<T> {
 
     }
 
-    public void delete(Object obj) {
+
+    /**
+     *
+     * @param obj
+     * @return Number of lines changed.
+     */
+    public int delete(Object obj) {
         this.getConnection();
         String dbName = obj.getClass().getName().replace("model.", "").toLowerCase();
         String id;
@@ -181,13 +193,11 @@ public class DBMenager<T> {
             preparedStatement = this.connection.prepareStatement(
                     "DELETE FROM public.?1 where id=".replace("?1", dbName) + id
             );
-            preparedStatement.execute();
+             return preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
-
-
 
 
 }

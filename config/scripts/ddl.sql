@@ -1,7 +1,5 @@
 create table test(
     id int primary key unique,
-    content jsonb
+    "name" TEXT,
+    test boolean
 )
-insert into test(id, content) values(0, '{id:0, name:"maurilio"}')
-
-
