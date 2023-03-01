@@ -4,6 +4,8 @@ import org.example.model.Person;
 import org.example.repository.db.DBMenager;
 import org.junit.Test;
 
+import java.util.Map;
+
 public class DBMenagerTest {
 
     @Test
@@ -58,6 +60,17 @@ public class DBMenagerTest {
 
     }
 
+    @Test
+    public void update(){
+        Person person = new Person();
+        DBMenager dbMenager = new DBMenager<Person>(person);
+        person.setCpf("4004000");
+        person.setId(1L);
+        person.setLevel(Map.of("hard", 0));
+        person.setName("maurilio");
+        dbMenager.update(person);
+
+    }
 
 
 }

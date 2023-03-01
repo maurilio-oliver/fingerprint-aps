@@ -2,7 +2,7 @@ package org.example.model;
 
 import java.util.Map;
 
-public class Table {
+public class Tables {
     private Long id;
     private String name;
     private String description;

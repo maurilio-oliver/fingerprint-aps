@@ -3,11 +3,13 @@ package org.example.repository.db;
 import com.google.gson.Gson;
 import org.example.helper.PropertieHelper;
 import org.example.model.Person;
-import org.example.model.Table;
+import org.example.model.Tables;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class DBMenager<T> {
@@ -36,7 +38,7 @@ public class DBMenager<T> {
         }
     }
 
-    public T select(String query) {
+    public List<T> select(String query) {
         this.getConnection();
         try {
             PreparedStatement statement = this.connection.prepareStatement(query);
@@ -48,9 +50,10 @@ public class DBMenager<T> {
 
     }
 
-    private T extractResult(ResultSet resultSet) throws SQLException {
+    private List<T> extractResult(ResultSet resultSet) throws SQLException {
         Class<?> clazz = this.entity.getClass();
-        if (resultSet.next()) {
+        List<T> objs = new ArrayList<T>();
+        while (resultSet.next()) {
 
             for (Method methdo : clazz.getDeclaredMethods()) {
                 String methodName = methdo.getName();
@@ -62,7 +65,7 @@ public class DBMenager<T> {
 
                         Method outSide = this.entity.getClass().getMethod(methodName.replace("set", "get"), null);
                         Object arg = resultSet.getObject(nameFormmater);
-                        arg = new Gson().fromJson(arg == null ? null : arg.toString(), outSide.getReturnType());
+                        arg = new Gson().fromJson(arg == null ? null : arg.toString().replaceAll(" ", "_"), outSide.getReturnType());
                         this.entity.getClass().getMethod(methodName, outSide.getReturnType()).invoke(entity, arg);
 
                     } catch (IllegalAccessException e) {
@@ -76,8 +79,9 @@ public class DBMenager<T> {
                     }
                 }
             }
+            objs.add(this.entity);
         }
-        return this.entity;
+        return objs;
     }
 
 
@@ -96,9 +100,9 @@ public class DBMenager<T> {
 
                     try {
                         if (nameFormmater.contains( "id")) {
-                            id = declaredMethod.invoke(obj, null) == null ? "null" : "" + declaredMethod.invoke(obj, null);
+                            id = declaredMethod.invoke(obj, null) + "";
                         } else {
-                            set = set + ", " + nameFormmater + "='" + declaredMethod.invoke(obj, null) + "'";
+                            set = set + ", " + nameFormmater + "='" + new Gson().toJsonTree(declaredMethod.invoke(obj, null)) + "'";
                         }
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
@@ -112,9 +116,14 @@ public class DBMenager<T> {
         this.getConnection();
 
         try {
-            PreparedStatement statement = this.connection.prepareStatement( " UPDATE public." + dbName + " SET ?1 WHERE id = ?2;"
+            String query = " UPDATE public." + dbName.replace("org.example.", "") + " SET ?1 WHERE id = ?2;"
                     .replace("?1",set.substring(2))
-                    .replace("?2", id));
+                    .replace("?2", id);
+
+            PreparedStatement statement = this.connection.prepareStatement(
+                    query.replaceAll("'null'", "null")
+                            .replaceAll("'\"", "'").replaceAll("\"'", "'")
+            );
 
             return statement.executeUpdate();
         } catch (SQLException e) {
@@ -154,7 +163,7 @@ public class DBMenager<T> {
         try {
             PreparedStatement statement = this.connection.prepareStatement(
                     "INSERT INTO public.?0 (?1) VALUES (?2);"
-                            .replace("?0", dbName)
+                            .replace("?0", dbName.replace("org.example.", ""))
                     .replace("?1", collum.substring(2))
                     .replace("?2", value.substring(2)));
 

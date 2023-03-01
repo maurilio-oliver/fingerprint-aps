@@ -1,5 +1,8 @@
 package org.example.view;
 
+import org.example.model.Person;
+import org.example.service.FingerSprintService;
+import org.example.service.PersonService;
 import org.example.view.commom.Windown;
 
 import javax.swing.*;
@@ -10,6 +13,11 @@ public class Loggin extends Windown {
 
     private TextField email  = new TextField();
     private File image;
+    private Person person;
+
+
+    private FingerSprintService fingerSprintService = new FingerSprintService();
+    private PersonService personService = new PersonService();
 
     public Loggin() {
         this.setLayout(null);
@@ -37,7 +45,7 @@ public class Loggin extends Windown {
     }
 
     private void onClick() {
-        if (image == null) {
+
            JFileChooser chooser = new JFileChooser();
            chooser.setDialogTitle("selecione uma digital");
            int condition = chooser.showOpenDialog(this);
@@ -47,9 +55,25 @@ public class Loggin extends Windown {
 
            }
 
-        } else {
-            System.out.println("existe um arquivo");
-        }
+           Person person = new Person();
+           if (this.email.getText().contains("@")){
+               person.setEmail(this.email.getText());
+           } else {
+               person.setCpf(this.email.getText());
+           }
+
+           person = personService.findPersonByEmailOrCPF(person);
+           if (person != null) {
+               new Home(person);
+               this.dispose();
+           } else {
+               this.image = null;
+           }
+            System.out.println(person);
+
+
+
+
     }
 
 

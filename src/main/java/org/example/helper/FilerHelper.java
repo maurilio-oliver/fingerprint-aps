@@ -1,4 +1,4 @@
-package org.example.service;
+package org.example.helper;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -9,11 +9,13 @@ import java.util.List;
 
 public class FilerHelper {
 
-    public static void UTF_FOR_BASE64 (String path) throws IOException {
-        byte[] bytes = Files.readAllBytes(Path.of(path));
+    public static String UTF_FOR_BASE64 (String file)  {
+        byte[] bytes = new byte[0];
+            bytes = file.getBytes();
+
         byte[] d = Base64.getEncoder().encode(bytes);
         //TODO: set return tips in void function for data base
-
+        return new String(d);
     }
 
     public static void BASE64_FOR_UTF (String encoder) {

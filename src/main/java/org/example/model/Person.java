@@ -9,7 +9,15 @@ public class Person {
     private String email;
     private String cpf;
     private Map<String, Integer> level;
-    private Long fingerPrintId;
+    private String pathFingerprint;
+
+    public String getPathFingerprint() {
+        return pathFingerprint;
+    }
+
+    public void setPathFingerprint(String pathFingerprint) {
+        this.pathFingerprint = pathFingerprint;
+    }
 
     public Long getId() {
         return id;
@@ -20,10 +28,11 @@ public class Person {
     }
 
     public String getName() {
-        return name;
+        return name.replaceAll("_", " ");
     }
 
     public void setName(String name) {
+        name = name.replaceAll("_", " ");
         this.name = name;
     }
 
@@ -51,11 +60,4 @@ public class Person {
         this.level = level;
     }
 
-    public Long getFingerPrintId() {
-        return fingerPrintId;
-    }
-
-    public void setFingerPrintId(Long fingerPrintId) {
-        this.fingerPrintId = fingerPrintId;
-    }
 }

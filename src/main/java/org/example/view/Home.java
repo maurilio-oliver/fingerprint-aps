@@ -1,5 +1,6 @@
 package org.example.view;
 
+import org.example.model.Person;
 import org.example.view.commom.Windown;
 
 import javax.swing.*;
@@ -9,9 +10,11 @@ import java.awt.*;
 
 public class Home extends Windown {
     private TextField query = new TextField();
+    private Person person = new Person();
 
-    public Home() {
+    public Home(Person person) {
         this.setLayout(null);
+        this.person = person;
         loadComponents();
     }
 
@@ -41,7 +44,5 @@ public class Home extends Windown {
         return table;
     }
 
-    public static void main(String[] args) {
-        new Home();
-    }
+
 }
