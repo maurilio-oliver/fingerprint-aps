@@ -4,7 +4,7 @@ import com.machinezoo.sourceafis.FingerprintImage;
 import com.machinezoo.sourceafis.FingerprintMatcher;
 import com.machinezoo.sourceafis.FingerprintTemplate;
 import org.example.helper.FilerHelper;
-import org.example.model.FingerPrint;
+
 import org.example.repository.FingerprintRepository;
 
 import java.io.IOException;
@@ -43,11 +43,7 @@ public class FingerSprintService {
 
         return null;
     }
-    public void save(FingerPrint fingerPrint) {
-        String encode = FilerHelper.UTF_FOR_BASE64(fingerPrint.getFingerPrint());
-        fingerPrint.setFingerPrint(encode);
-        this.fingerprintRepository.save(fingerPrint);
-    }
+
 
     public static void main(String[] args) {
         FingerSprintService fss = new FingerSprintService();
