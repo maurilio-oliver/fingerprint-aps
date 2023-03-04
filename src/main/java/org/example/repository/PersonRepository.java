@@ -25,12 +25,11 @@ public class PersonRepository{
 
     public Person findAllByPerson(Person person){
         try {
-        Person obj = (Person) dbMenager.select(
-                "select * from person where " +
-                        "email='"+person.getEmail()+"'" +
-                        " or cpf='"+person.getCpf() + "'"
-
-        ).get(0);
+            String query = "select * from person where " +
+                    "email='"+person.getEmail()+"'" +
+                    " or cpf='"+person.getCpf() + "'" +
+                    "or id="+person.getId();
+        Person obj = (Person) dbMenager.select(query).get(0);
         return obj;
         } catch (Exception e) {
           return null;

@@ -14,11 +14,11 @@ public class Loggin extends Windown {
 
     private final TextField email = new TextField();
     private File image;
-    private Person person;
 
 
-    private final FingerSprintService fingerSprintService = new FingerSprintService();
+
     private final PersonService personService = new PersonService();
+    private final FingerSprintService fingerSprintService = new FingerSprintService();
 
     public Loggin() {
         this.setLayout(null);
@@ -71,6 +71,9 @@ public class Loggin extends Windown {
                 person.setEmail(this.email.getText());
                 //  find person by email in database
                 person = personService.findPersonByEmailOrCPF(person);
+            } else if (this.email.getText().isBlank()) {
+                person.setId(new Long((fingerSprintService.test(image.getAbsolutePath()).replace(".tif", ""))));
+               person = this.personService.findPersonByEmailOrCPF(person);
             } else {
                 // then set person cpf
                 person.setCpf(this.email.getText());
@@ -79,8 +82,14 @@ public class Loggin extends Windown {
             }
             // if person not null
             if (person != null) {
+                boolean check = fingerSprintService.checkUser(image.getAbsolutePath(), person.getPathFingerprint());
                 // call frame 'Home'
-                new Home(person);
+                if (check) {
+                    new Home(person);
+                } else {
+                    this.image = null;
+                    JOptionPane.showMessageDialog(this,"digital não compativel", "erro de compatibilidade",1);
+                }
                 // close this frame
                 this.dispose();
             } else {

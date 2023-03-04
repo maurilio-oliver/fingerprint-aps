@@ -8,8 +8,12 @@ import org.example.helper.FilerHelper;
 import org.example.repository.FingerprintRepository;
 
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FingerSprintService {
 
@@ -36,21 +40,48 @@ public class FingerSprintService {
         FingerprintMatcher matcher = new FingerprintMatcher(probable);
         Double equality = matcher.match(candidate);
 
+
+
         return equality ;
     }
 
-    public Boolean checkUser(Integer personId) {
+    public String test(String candidate){
+        String id = "";
+        try {
+           List<Path> paths = Files.walk(Path.of("src/main/resources/fingerprint/"), 1, FileVisitOption.FOLLOW_LINKS).toList();
 
-        return null;
+            for (Path path : paths) {
+                if (!(path.toString().equals("src/main/resources/fingerprint"))) {
+                    Number equelity = this.compare(
+                            this.getFingerSprint(path.toString()),
+                            this.getFingerSprint(candidate)
+                    );
+
+                    if (equelity.intValue() >= 60) {
+                        id = path.getFileName().toString();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(id);
+        return id;
+    }
+
+    public Boolean checkUser(String candidate, String proble) {
+        Number equelity = this.compare(
+                this.getFingerSprint(proble),
+                this.getFingerSprint(candidate)
+        );
+        return equelity.intValue() > 60;
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         FingerSprintService fss = new FingerSprintService();
-        System.out.println( fss.compare(
-                fss.getFingerSprint("src/main/resources/101_1.tif"),
-                fss.getFingerSprint("src/main/resources/103_6.tif")
-        ));
+
+    fss.test("src/main/resources/fingerprint/6.tif");
 
 
 

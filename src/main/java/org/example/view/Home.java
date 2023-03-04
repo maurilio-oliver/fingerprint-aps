@@ -69,6 +69,9 @@ public class Home extends Windown {
 
     }
 
+    /**
+     * load query label
+     */
     private void loadLabel(){
         this.query.setBounds(10, 60, 100, 30);
         Label queryLabel = new Label();
@@ -79,17 +82,20 @@ public class Home extends Windown {
 
     private Component loadTable() throws SQLException {
         try {
+            // pre define query
             String query = "select * from " + this.list.getSelectedValue();
+            // if query field is not black
             if (this.query != null && !this.query.getText().isBlank()) {
                 query = query + " where " + this.query.getText();
             } else {
                 query = query + " limit 10";
             }
-            System.out.println(query);
-            Map map = this.dbConnectionService.test(query);
+            // get data
+            Map map = this.dbConnectionService.select(query);
             // get cell data
             Object[][] dados = (Object[][]) ((List<Object[]>) map.get("data")).toArray(new Object[][]{});
             String[] colunas = (String[]) ((List) map.get("fields")).toArray(new String[]{});
+            // configure table container
             tablePanel.setLayout(new GridLayout(1, 1));
             this.tabela = new JTable(dados, colunas);
             JScrollPane barraRolagem = new JScrollPane(this.tabela);
@@ -99,10 +105,8 @@ public class Home extends Windown {
                     250,
                     Toolkit.getDefaultToolkit().getScreenSize().width - 500,
                     Toolkit.getDefaultToolkit().getScreenSize().height - 400);
-
-
+            // add tables panel in this container
             this.add(tablePanel);
-
             return tablePanel;
         } catch (SQLException sql) {
             JOptionPane.showConfirmDialog(this, sql.getMessage());
@@ -113,38 +117,54 @@ public class Home extends Windown {
 
     }
 
+    /**
+     * loads a list of all tables allowed to the user
+     * @return component in list format
+     * @throws SQLException
+     */
     public Component loadTableList() throws SQLException {
+        // position the list
+        this.list.setBounds(0,  0, 50,100);
+        // get tables allowed to the user
+        List<Tables> tablesAllowed = this.tablesRepository.findAll();
+        // crate name list
+        List<String> names = new ArrayList<>();
 
-        list.setBounds(0,  0, 50,100);
-        List<Tables> test = this.tablesRepository.findAll();
-
-
-        System.out.println(test);
-         List<String> a = new ArrayList<>();
-
-        test.forEach( t -> {
+        tablesAllowed.forEach( t -> {
+            // if table level is lower than person level
             if (t.getLevel() <= this.person.getLevel()) {
-                a.add(t.getName());
+                // add name in list
+                names.add(t.getName());
             }
         });
-
-        this.list.setListData(a.toArray(new String[]{}));
+        // add names in component list
+        this.list.setListData(names.toArray(new String[]{}));
+        //create new container
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(1, 1));
         JScrollPane scroll = new JScrollPane(list);
         panel.add(scroll);
         panel.setBounds(Toolkit.getDefaultToolkit().getScreenSize().width-300,60, 200, 100);
+        // return panel
         return panel;
 
     }
 
+    /**
+     * set action on search button component
+     * @throws SQLException
+     */
     private void onClick() throws SQLException {
-
-            this.remove(tablePanel);
-            this.removeAll(tablePanel, tabela);
-            if (this.tablePanel.getComponentCount() > 0)
+        // remove table panel in this frame
+        this.remove(tablePanel);
+        // remove table and table panel in Windown component
+        this.removeAll(tablePanel, tabela);
+        // if the table pane has more than one component
+        if (this.tablePanel.getComponentCount() > 0)
+            // remove the first component before load table
             this.tablePanel.remove(0);
-            this.loadTable();
+        // show new table with search results
+        this.loadTable();
 
     }
 
