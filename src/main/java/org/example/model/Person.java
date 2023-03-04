@@ -8,7 +8,7 @@ public class Person {
     private String name;
     private String email;
     private String cpf;
-    private Map<String, Integer> level;
+    private Integer level;
     private String pathFingerprint;
 
     public String getPathFingerprint() {
@@ -52,12 +52,23 @@ public class Person {
         this.cpf = cpf;
     }
 
-    public Map<String, Integer> getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setLevel(Map<String, Integer> level) {
+    public void setLevel(Integer level) {
         this.level = level;
     }
 
+    @Override
+    public String toString() {
+        return "Person{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", cpf='" + cpf + '\'' +
+                ", level=" + level +
+                ", pathFingerprint='" + pathFingerprint + '\'' +
+                '}';
+    }
 }

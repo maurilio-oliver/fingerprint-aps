@@ -6,8 +6,7 @@ public class Tables {
     private Long id;
     private String name;
     private String description;
-    private Map<String, Integer> level;
-    private Map<String, String> field;
+    private  Integer level;
 
     public Long getId() {
         return id;
@@ -33,19 +32,21 @@ public class Tables {
         this.description = description;
     }
 
-    public Map<String, Integer> getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setLevel(Map<String, Integer> level) {
+    public void setLevel(Integer level) {
         this.level = level;
     }
 
-    public Map<String, String> getField() {
-        return field;
-    }
-
-    public void setField(Map<String, String> field) {
-        this.field = field;
+    @Override
+    public String toString() {
+        return "Tables{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", level=" + level +
+                '}';
     }
 }

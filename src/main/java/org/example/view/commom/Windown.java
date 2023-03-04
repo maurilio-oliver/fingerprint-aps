@@ -17,4 +17,10 @@ public abstract class Windown extends JFrame {
         }
     }
 
+    public void removeAll(Component... components) {
+        for (Component component : components) {
+            this.remove(component);
+        }
+    }
+
 }

@@ -66,7 +66,7 @@ public class DBMenagerTest {
         DBMenager dbMenager = new DBMenager<Person>(person);
         person.setCpf("4004000");
         person.setId(1L);
-        person.setLevel(Map.of("hard", 0));
+        person.setLevel(1);
         person.setName("maurilio");
         dbMenager.update(person);
 

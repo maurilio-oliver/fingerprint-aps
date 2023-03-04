@@ -3,7 +3,6 @@ package org.example.repository.db;
 import com.google.gson.Gson;
 import org.example.helper.PropertieHelper;
 import org.example.model.Person;
-import org.example.model.Tables;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,8 +21,7 @@ public class DBMenager<T> {
     }
 
 
-
-    private void getConnection() {
+    public Connection getConnection() {
 
         Properties prop = new Properties();
         // set db properties
@@ -32,7 +30,7 @@ public class DBMenager<T> {
         String url = PropertieHelper.load().getProperty("config.db.url");
         try {
             // get db connection
-            connection = DriverManager.getConnection(url, prop);
+            return connection = DriverManager.getConnection(url, prop);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -46,45 +44,62 @@ public class DBMenager<T> {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
+
     private List<T> extractResult(ResultSet resultSet) throws SQLException {
-        Class<?> clazz = this.entity.getClass();
         List<T> objs = new ArrayList<T>();
         while (resultSet.next()) {
+            try {
+                T o = (T) this.entity.getClass().getConstructor(null).newInstance(null);
+                Class<?> clazz = o.getClass();
 
-            for (Method methdo : clazz.getDeclaredMethods()) {
-                String methodName = methdo.getName();
-                String nameFormmater = methodName.substring(3,4).toLowerCase() + methodName.substring(4,methodName.length());
+                for (Method methdo : clazz.getDeclaredMethods()) {
+                    String methodName = methdo.getName();
+                    String nameFormmater = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
 
-                if (methdo.getName().contains("set")) {
+                    if (methdo.getName().contains("set")) {
+                        try {
 
-                    try {
+                            Method outSide = o.getClass().getMethod(methodName.replace("set", "get"), null);
+                            Object arg = resultSet.getObject(nameFormmater);
+                            switch (outSide.getReturnType().getName()){
+                                case "java.lang.String":
+                                    arg = (String) arg;
+                                    break;
+                                default:
+                                    arg = new Gson().fromJson(arg == null ? null : arg.toString(), outSide.getReturnType());
+                                    break;
+                            }
 
-                        Method outSide = this.entity.getClass().getMethod(methodName.replace("set", "get"), null);
-                        Object arg = resultSet.getObject(nameFormmater);
-                        arg = new Gson().fromJson(arg == null ? null : arg.toString().replaceAll(" ", "_"), outSide.getReturnType());
-                        this.entity.getClass().getMethod(methodName, outSide.getReturnType()).invoke(entity, arg);
+                            o.getClass().getMethod(methodName, outSide.getReturnType()).invoke(o, arg);
 
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    } catch (InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    } catch (NoSuchMethodException e) {
-                        throw new RuntimeException(e);
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        } catch (InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        } catch (NoSuchMethodException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
+                objs.add(o);
+            } catch (InstantiationException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
             }
-            objs.add(this.entity);
+
+
         }
         return objs;
     }
-
-
 
     public int update(Object obj) {
 
@@ -94,20 +109,20 @@ public class DBMenager<T> {
 
         for (Method declaredMethod : obj.getClass().getDeclaredMethods()) {
             String methodName = declaredMethod.getName();
-            String nameFormmater = methodName.substring(3,4).toLowerCase() + methodName.substring(4,methodName.length());
+            String nameFormmater = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
 
             if (methodName.contains("get")) {
 
-                    try {
-                        if (nameFormmater.contains( "id")) {
-                            id = declaredMethod.invoke(obj, null) + "";
-                        } else {
-                            set = set + ", " + nameFormmater + "='" + new Gson().toJsonTree(declaredMethod.invoke(obj, null)) + "'";
-                        }
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    } catch (InvocationTargetException e) {
-                        throw new RuntimeException(e);
+                try {
+                    if (nameFormmater.contains("id")) {
+                        id = declaredMethod.invoke(obj, null) + "";
+                    } else {
+                        set = set + ", " + nameFormmater + "='" + new Gson().toJsonTree(declaredMethod.invoke(obj, null)) + "'";
+                    }
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
 
                 }
             }
@@ -117,7 +132,7 @@ public class DBMenager<T> {
 
         try {
             String query = " UPDATE public." + dbName.replace("org.example.", "") + " SET ?1 WHERE id = ?2;"
-                    .replace("?1",set.substring(2))
+                    .replace("?1", set.substring(2))
                     .replace("?2", id);
 
             PreparedStatement statement = this.connection.prepareStatement(
@@ -132,7 +147,7 @@ public class DBMenager<T> {
 
     }
 
-    public int insert (T obj) {
+    public int insert(T obj) {
 
         String dbName = obj.getClass().getName().replace("model.", "").toLowerCase();
         String collum = "";
@@ -140,23 +155,23 @@ public class DBMenager<T> {
 
         for (Method declaredMethod : obj.getClass().getDeclaredMethods()) {
             String methodName = declaredMethod.getName();
-            String nameFormmater = methodName.substring(3,4).toLowerCase() + methodName.substring(4,methodName.length());
+            String nameFormmater = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
 
             try {
-            if (methodName.contains("get")) {
-                Object a = declaredMethod.invoke(obj, null);
-                if (a != null) {
-                    collum = collum + ", " + nameFormmater;
-                    value = value + ", '" + a + "'";
+                if (methodName.contains("get")) {
+                    Object a = declaredMethod.invoke(obj, null);
+                    if (a != null) {
+                        collum = collum + ", " + nameFormmater;
+                        value = value + ", '" + a + "'";
+                    }
                 }
-            }
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                } catch (InvocationTargetException e) {
-                    throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
 
-                }
             }
+        }
 
         this.getConnection();
 
@@ -164,10 +179,10 @@ public class DBMenager<T> {
             PreparedStatement statement = this.connection.prepareStatement(
                     "INSERT INTO public.?0 (?1) VALUES (?2);"
                             .replace("?0", dbName.replace("org.example.", ""))
-                    .replace("?1", collum.substring(2))
-                    .replace("?2", value.substring(2)));
+                            .replace("?1", collum.substring(2))
+                            .replace("?2", value.substring(2)));
 
-          return  statement.executeUpdate();
+            return statement.executeUpdate();
 
 
         } catch (SQLException e) {
@@ -175,12 +190,9 @@ public class DBMenager<T> {
         }
 
 
-
     }
 
-
     /**
-     *
      * @param obj
      * @return Number of lines changed.
      */
@@ -189,7 +201,7 @@ public class DBMenager<T> {
         String dbName = obj.getClass().getName().replace("model.", "").toLowerCase();
         String id;
         try {
-            id = ""+ obj.getClass().getMethod("getId").invoke(obj, null);
+            id = "" + obj.getClass().getMethod("getId").invoke(obj, null);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
@@ -202,11 +214,10 @@ public class DBMenager<T> {
             preparedStatement = this.connection.prepareStatement(
                     "DELETE FROM public.?1 where id=".replace("?1", dbName) + id
             );
-             return preparedStatement.executeUpdate();
+            return preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
-
 
 }

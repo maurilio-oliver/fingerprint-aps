@@ -26,4 +26,15 @@ public class PersonService {
     public void updatePerson(Person person) {
         this.personRepository.update(person);
     }
+
+    public void test(){
+        Person ethan=new Person();
+        ethan.setCpf("49028922321");
+        Person test=this.findPersonByEmailOrCPF(ethan);
+        System.out.println(test);
+        System.out.println(test.getLevel());
+    }
+    public static void main(String[] arg){
+        new PersonService().test();
+    }
 }
